@@ -1,7 +1,8 @@
 // src/pages/ForgotVerifyOtp.jsx
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { forgotVerifyOtp } from "../api/auth";
+import { forgotVerifyOtp, resendOtp } from "../api/auth";
+import Swal from "sweetalert2";
 
 export default function ForgotVerifyOtp() {
     const { state } = useLocation();
@@ -11,6 +12,7 @@ export default function ForgotVerifyOtp() {
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [resending, setResending] = useState(false);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -24,22 +26,52 @@ export default function ForgotVerifyOtp() {
         setLoading(true);
         try {
             const resp = await forgotVerifyOtp({ email, otp });
-            console.log("FVotp---", resp);
-            console.log("FVotp---1", resp.data?.token);
-            console.log("FVotp---2", resp.data?.data?.token);
 
             setLoading(false);
 
             const token = resp.data?.data?.token;
             if (!token) {
-                setError("token returned. Cannot reset password.");
+                setError("No token returned. Cannot reset password.");
                 return;
             }
 
-            navigate("/reset-password", { state: { email: email, token: token } });
+            navigate("/reset-password", { state: { email, token } });
         } catch (err) {
             setLoading(false);
             setError(err.response?.data?.message || "Invalid OTP");
+        }
+    }
+
+    async function handleResendOtp() {
+        if (!email) {
+            Swal.fire({
+                icon: "error",
+                title: "Missing Email",
+                text: "Email is required to resend OTP.",
+                confirmButtonColor: "#dc2626",
+            });
+            return;
+        }
+
+        setResending(true);
+        try {
+            await resendOtp({ email });
+
+            Swal.fire({
+                icon: "success",
+                title: "OTP Resent",
+                text: `A new OTP has been sent to ${email}`,
+                confirmButtonColor: "#16a34a",
+            });
+        } catch (err) {
+            Swal.fire({
+                icon: "error",
+                title: "Failed to Resend",
+                text: err.response?.data?.message || "Could not resend OTP. Please try again.",
+                confirmButtonColor: "#dc2626",
+            });
+        } finally {
+            setResending(false);
         }
     }
 
@@ -80,7 +112,14 @@ export default function ForgotVerifyOtp() {
 
                 <p className="text-center text-sm text-gray-500 mt-6">
                     Didn’t receive the code?{" "}
-                    <button className="text-green-600 hover:underline">Resend OTP</button>
+                    <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={resending}
+                        className="text-green-600 hover:underline"
+                    >
+                        {resending ? "Resending..." : "Resend OTP"}
+                    </button>
                 </p>
             </div>
         </div>

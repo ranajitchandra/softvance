@@ -8,6 +8,7 @@ import ForgotPassword from "../authPage/ForgotPassword";
 import ForgotVerifyOtp from "../authPage/ForgotVerifyOtp";
 import ResetPassword from "../authPage/ResetPassword";
 import PrivateRoute from "../components/PrivateRoute/PrivateRoute";
+import ErrorPage from "../components/ErrorPage";
 
 
 export const router = createBrowserRouter(
@@ -49,7 +50,7 @@ export const router = createBrowserRouter(
         },
         {
             path: "*",
-            element: <>Error</>
+            element: <ErrorPage></ErrorPage>
         }
     ]
 )
