@@ -39,6 +39,12 @@ export async function forgotPassword(data) {
   return client.post("/forgot-password", data);
 }
 
+// ✅ Forgot Password Verify OTP
+export async function forgotVerifyOtp(data) {
+  // { email, otp }
+  return client.post("/forgot-verify-otp", data);
+}
+
 // Reset password
 export async function resetPassword(data) {
   // { email, otp, password, password_confirmation }

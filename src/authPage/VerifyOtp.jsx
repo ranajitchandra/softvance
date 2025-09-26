@@ -53,7 +53,7 @@ export default function VerifyOtp() {
             await verifyOtp(fd);
             setLoading(false);
             alert("OTP Verified successfully. You can login now.");
-            navigate("/login");
+            navigate("/");
         } catch (err) {
             setLoading(false);
             setServerError(err.response?.data?.message || "Invalid OTP. Try again.");

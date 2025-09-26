@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useNavigate } from "react-router";
 import { login } from "../api/auth";
+import Swal from "sweetalert2";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -53,19 +54,35 @@ export default function Login() {
             const resp = await login(fd);
             setLoading(false);
 
+            console.log("Login---2", resp.data?.data?.email);
+
             // store token/user if backend returns
             if (resp.data?.token) {
-                localStorage.setItem("token", resp.data.token);
-            }
+                localStorage.setItem("token", resp?.data?.token);
+                if (resp.data?.data?.email) {
+                    localStorage.setItem("user", JSON.stringify(resp.data?.data?.email));
+                }
 
-            navigate("/dashboard");
+                Swal.fire({
+                    icon: "success",
+                    title: "Login Successful",
+                    text: "Welcome back! Redirecting to dashboard...",
+                    confirmButtonColor: "#16a34a",
+                    timer: 2000,
+                    showConfirmButton: false,
+                }).then(() => {
+                    navigate("/dashboard");
+                });
+            }
         } catch (err) {
             setLoading(false);
-            if (err.response?.data?.message) {
-                setServerError(err.response.data.message);
-            } else {
-                setServerError("Login failed. Please try again.");
-            }
+
+            Swal.fire({
+                icon: "error",
+                title: "Login Failed",
+                text: err.response?.data?.message || "Something went wrong. Please try again.",
+                confirmButtonColor: "#dc2626",
+            });
         }
     }
 
@@ -138,6 +155,27 @@ export default function Login() {
                             </p>
                         )}
                     </div>
+                    <div className="text-right mt-1">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (!form.email?.trim()) {
+                                    // Show alert if empty
+                                    Swal.fire({
+                                        icon: "warning",
+                                        title: "Email Required",
+                                        text: "Please enter your email before continuing.",
+                                        confirmButtonColor: "#16a34a",
+                                    });
+                                    return;
+                                }
+                                navigate("/forgot-password", { state: { email: form.email } });
+                            }}
+                            className="text-sm text-green-600 hover:underline cursor-pointer"
+                        >
+                            Forgot Password?
+                        </button>
+                    </div>
 
                     {serverError && (
                         <div className="text-sm text-red-600">{serverError}</div>
@@ -147,8 +185,8 @@ export default function Login() {
                         type="submit"
                         disabled={loading}
                         className={`w-full rounded-md px-4 py-2 text-white font-medium shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 ${loading
-                                ? "bg-green-400 cursor-not-allowed"
-                                : "bg-green-600 hover:bg-green-700"
+                            ? "bg-green-400 cursor-not-allowed"
+                            : "bg-green-600 hover:bg-green-700"
                             }`}
                         aria-busy={loading}
                     >

@@ -258,8 +258,8 @@ export default function Register() {
                 </button>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
-                    Don’t have an account?{" "}
-                    <a href="/login" className="text-green-600 hover:underline">Get started</a>
+                    Aready have an account?{" "}
+                    <a href="/" className="text-green-600 hover:underline">Login</a>
                 </p>
             </div>
         </div>
